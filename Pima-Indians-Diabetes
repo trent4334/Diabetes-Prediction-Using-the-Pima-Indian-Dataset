@@ -1,0 +1,256 @@
+%matplotlib inline
+
+import pandas as pd
+import numpy as np
+from sklearn.metrics import pairwise_distances
+from sklearn import cluster, datasets, preprocessing, metrics
+import matplotlib.pyplot as plt
+import seaborn as sns
+import statsmodels.api as sm
+
+plt.style.use('fivethirtyeight')
+
+from sklearn.preprocessing import OneHotEncoder, StandardScaler
+from sklearn.model_selection import train_test_split
+
+from sklearn.linear_model import LinearRegression, Ridge, Lasso
+from sklearn.metrics import mean_absolute_error, mean_squared_error
+
+from sklearn.tree import DecisionTreeRegressor
+from sklearn.ensemble import RandomForestRegressor
+
+import statsmodels.api as sm
+import warnings
+warnings.filterwarnings('ignore')
+pd.set_option("display.max_columns", 101)
+
+from sklearn.tree import DecisionTreeClassifier # Import Decision Tree Classifier
+from sklearn.model_selection import train_test_split # Import train_test_split function
+from sklearn import metrics #Import scikit-learn metrics module for accuracy calculation
+
+
+# Check out the dataset
+df = pd.read_csv("diabetes.csv")
+df.head()
+
+
+#Check Null value
+null_values = df.isnull().sum()
+print(null_values)
+
+#Create pair plot for the factors
+#Check if there is any relationship between each variable
+cols = df.columns[:-2]
+sns.pairplot(df[cols])
+
+
+cols_of_interest = ["Pregnancies", "Glucose", "BloodPressure", "SkinThickness", "Insulin", "BMI", "DiabetesPedigreeFunction", "Age"]
+X = df[cols_of_interest]
+y = df["Outcome"]
+
+#Add a constant term to the features for the intercept
+X = sm.add_constant(X)
+
+#Fit logistic regression model
+logit_model = sm.Logit(y,X)
+result = logit_model.fit()
+
+print(result.summary())
+
+#Multi-Regression
+X = df[cols_of_interest]
+y = df["Outcome"]
+
+X = sm.add_constant(X)
+
+model = sm.OLS(y,X).fit()
+print(model.summary())
+
+#Data Training
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score
+
+# Split the data into features (X) and target variable (y)
+X = df[cols_of_interest]
+y = df["Outcome"]
+
+# Split the data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+print("Training Set Dimensions: ", X_train.shape)
+print("Validation Set Dimensions: ", X_test.shape)
+
+reg=LinearRegression()
+reg.fit(X_train, y_train)
+
+reg.coef_
+
+reg.intercept_
+
+mean_absolute_error(y_train,reg.predict(X_train))
+
+mean_squared_error(y_train,reg.predict(X_train))**0.5
+
+
+
+# train Decision Tree regression model
+decisiontree = DecisionTreeRegressor(max_depth = 10, min_samples_split = 5)
+decisiontree.fit(X_train, y_train)
+
+#evaluating train error
+
+mean_absolute_error(y_train,decisiontree.predict(X_train))
+
+max_depth_list = [2,3,4,5,6,7,8,9,10,11,12,20]
+train_error = []
+test_error =[]
+
+for md in max_depth_list:
+
+    decisiontree = DecisionTreeRegressor(max_depth = md, min_samples_split = 2)
+    decisiontree.fit(X_train, y_train)
+    train_error.append(mean_absolute_error(y_train,decisiontree.predict(X_train)))
+    test_error.append(mean_absolute_error(y_test,decisiontree.predict(X_test)))
+
+plt.plot(max_depth_list,train_error,label = 'train error')
+plt.plot(max_depth_list,test_error,label = 'test error')
+plt.legend()
+
+
+# Fitting a Random Forest Regression
+
+randomf = RandomForestRegressor(100,)
+randomf.fit(X_train, y_train)
+mean_absolute_error(y_train,randomf.predict(X_train))
+
+max_depth_list = [10,11,12,13,14,15,16,17,18,19,20]
+train_error = []
+test_error =[]
+N_estimator=[20,30,40,50,60,70,80,90,100]
+for n in N_estimator:
+
+    decisiontree = RandomForestRegressor(n_estimators=n, max_depth = 12, min_samples_split = 2)
+    decisiontree.fit(X_train, y_train)
+    train_error.append(mean_absolute_error(y_train,decisiontree.predict(X_train)))
+    test_error.append(mean_absolute_error(y_test,decisiontree.predict(X_test)))
+
+plt.plot(N_estimator,train_error,marker='o',label = 'train error')
+plt.plot(N_estimator,test_error,marker='o',label = 'test error')
+plt.legend()
+
+pd.DataFrame({'feature':X_train.columns, "importance":randomf.feature_importances_*100}).sort_values(by='importance', ascending=False)
+
+
+#Decision Tree Model
+
+# Create Decision Tree classifer object
+clf = DecisionTreeClassifier()
+
+# Train Decision Tree Classifer
+clf = clf.fit(X_train,y_train)
+
+#Predict the response for test dataset
+y_pred = clf.predict(X_test)
+
+!pip install graphviz
+!pip install pydotplus
+from sklearn.tree import export_graphviz
+
+from io import StringIO
+
+from IPython.display import Image
+import pydotplus
+
+dot_data = StringIO()
+export_graphviz(clf, out_file=dot_data,
+                filled=True, rounded=True,
+                special_characters=True,feature_names = cols_of_interest,class_names=['0','1'])
+graph = pydotplus.graph_from_dot_data(dot_data.getvalue())
+graph.write_png('diabetes.png')
+Image(graph.create_png())
+
+
+# Split the data into features (X) and target variable (y)
+X = df[cols_of_interest]
+y = df["Outcome"]
+
+# Split the data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Create a decision tree classifier with pruning parameters
+clf = DecisionTreeClassifier(max_depth=3, min_samples_split=5, min_samples_leaf=2)
+clf.fit(X_train, y_train)
+
+# Make predictions on the test set
+y_pred = clf.predict(X_test)
+
+# Evaluate the model
+accuracy = accuracy_score(y_test, y_pred)
+print(f"Accuracy: {accuracy}")
+
+# Visualize the pruned decision tree
+dot_data = StringIO()
+export_graphviz(clf, out_file=dot_data,
+                filled=True, rounded=True,
+                special_characters=True, feature_names=cols_of_interest, class_names=['0', '1'])
+graph = pydotplus.graph_from_dot_data(dot_data.getvalue())
+graph.write_png('pruned_diabetes.png')
+Image(graph.create_png())
+
+
+
+df.Outcome.value_counts().sort_index()
+
+
+
+df.sort_values(by = 'Glucose', inplace= True)
+
+#Plot the class predictions
+plt.scatter(df.Glucose,df.Outcome)
+plt.plot(df.Glucose, pred, color='red')
+plt.xlabel('Glucose')
+plt.ylabel('Outcome')
+
+
+logreg.predict_proba(X)[:15]
+
+
+#Store the predicted probailities of class 1
+df['Diabetes_predict_probability'] = logreg.predict_proba(X)[:,1]
+
+#Plot the predicted prabilities
+plt.scatter(df.Glucose, df.Outcome)
+plt.plot(df.Glucose, df.Diabetes_predict_probability,color = 'red')
+plt.xlabel('Glucose')
+plt.ylabel('Outcome')
+
+#Prediction Evaluation
+
+from sklearn import metrics
+cm = metrics.confusion_matrix(y_true=y, y_pred=pred)
+
+Accuracy = (cm[0,0]+ cm[1,1])/ (np.sum(cm))
+
+Precision = (cm[1,1])/ (np.sum(cm[: , 1]))
+
+Recall = (cm[1,1])/ (np.sum(cm[1,:]))
+
+from sklearn.metrics import accuracy_score, precision_score, recall_score
+accuracy_score(y_true=y, y_pred=pred)
+
+precision_score(y_true=y, y_pred=pred)
+
+recall_score(y,pred)
+
+
+
+
+
+
+
+
+
+
+
+
