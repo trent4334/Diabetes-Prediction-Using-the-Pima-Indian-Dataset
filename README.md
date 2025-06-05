@@ -38,14 +38,22 @@ This project explores various statistical and machine learning models to predict
    - Glucose had the highest influence on predicted probability  
    - Interpretable and widely used in clinical settings
 
+  **Logistic Regression Odds Ratios**  
+![Screenshot 2025-06-05 at 15 58 43](https://github.com/user-attachments/assets/666ced16-2222-4ab7-b3b3-56d9039d8a47)
+![Screenshot 2025-06-05 at 16 00 18](https://github.com/user-attachments/assets/b6329936-6a9a-4cfe-b841-6101fddf77b0)
+
+
 2. **Multiple Linear Regression (OLS)**  
    - Used to understand linear relationships and contribution of features  
    - Identified Glucose, Pregnancies, and BMI as statistically significant predictors
+![Screenshot 2025-06-05 at 16 00 50](https://github.com/user-attachments/assets/965d0e66-3c00-4ed7-a6b6-12126d5ec17c)
 
 3. **Decision Tree & Random Forest**  
    - Non-linear modeling with automatic feature selection  
    - Glucose identified as the root node in decision tree  
    - Accuracy improved through pruning and ensemble averaging
+   - 
+![Screenshot 2025-06-05 at 16 01 13](https://github.com/user-attachments/assets/10c4bb01-c312-4847-8256-837ccef3073d)
 
 ---
 
